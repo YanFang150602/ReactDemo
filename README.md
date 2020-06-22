@@ -1,6 +1,70 @@
+# React起步
+
+安装
+
+```shell
+# 安装react的脚手架工具
+npm install create-react-app -g
+# 通过脚手架工具创建项目，项目名不可以大写
+create-react-app reactdemo 
+```
+
+# prop-types
+
+校验组件属性
+
+1、引入：import PropTypes from 'prop-types'
+
+2、给组件定义propTypes：TodoItem.propTypes = {...}
+
+3、当存在父组件不传递某属性时，可以给该属性配置默认值TodoItem.defaultProps = {属性名: 属性默认值}
+
+```js
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+
+class TodoItem extends Component {
+    constructor(props) {
+        super(props);
+        this.handleClick = this.handleClick.bind(this);
+    }
+
+    render() {
+        const { content } = this.props;
+        return (
+            <div onClick={this.handleClick}>
+                {content}
+            </div>
+        )
+    }
+
+    handleClick() {
+        const { deleteItem, index } = this.props;
+        deleteItem(index);
+    }
+}
+
+// 校验TodoItem属性类型
+TodoItem.propTypes = {
+    content: PropTypes.string,
+    index: PropTypes.number,
+    deleteItem: PropTypes.func,
+    test: PropTypes.string.isRequired
+}
+
+// 父组件没有传递下面属性时，使用属性默认值
+TodoItem.defaultProps = {
+    test: 'Hello'
+}
+
+export default TodoItem;
+```
+
+
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Available Scripts
+# Available Scripts
 
 In the project directory, you can run:
 
@@ -37,7 +101,7 @@ Instead, it will copy all the configuration files and the transitive dependencie
 
 You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
 
-## Learn More
+# Learn More
 
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
