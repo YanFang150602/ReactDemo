@@ -1,17 +1,19 @@
 import React, { Component, Fragment } from 'react';
-import TodoItem from './TodoItem';
+import store from './store';
+// import TodoItem from './TodoItem';
+import { Input, Button, List } from 'antd';
+import 'antd/dist/antd.css';
 
 class TodoList extends Component {
     constructor(props) {
         super(props);
-        this.state = {
-            inputValue: '',
-            list: []
-        };
+        this.state = store.getState();
 
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleBtnClick = this.handleBtnClick.bind(this);
         this.handleItemDelete = this.handleItemDelete.bind(this);
+        this.handleStoreChange = this.handleStoreChange.bind(this);
+        store.subscribe(this.handleStoreChange);
     }
 
     render() {
@@ -19,40 +21,36 @@ class TodoList extends Component {
             <Fragment>
                 <div>
                     <label htmlFor="insertArea">输入内容</label>
-                    <input id="insertArea"
-                            className="input"
-                            value={this.state.inputValue}
-                            onChange={this.handleInputChange}></input>
-                    <button onClick={this.handleBtnClick}>提交</button>
+                    <Input placeholder="todo..." style={{width: '300px', marginRight: '10px'}}
+                        onChange={this.handleInputChange} value={this.state.inputValue}></Input>
+                    <Button type="primary" onClick={this.handleBtnClick}>提交</Button>
                 </div>
-                <ul>
-                    {this.getTodoItem()}
-                </ul>
+                <List style={{marginTop: '10px',width: '300px'}}
+                    bordered
+                    dataSource={this.state.list}
+                    renderItem={ (item, index) => (<List.Item onClick={this.handleItemDelete.bind(this, index)}>{item}</List.Item>)}
+                />
             </Fragment>
         )
     }
 
-    getTodoItem() {
-        return (
-            this.state.list.map((item, index) => {
-                return (
-                    <TodoItem key={index} content={item} index={index}
-                            deleteItem={this.handleItemDelete}></TodoItem>
-                )
-            })
-        )
-    }
-
     handleInputChange(e) {
+        console.log(e.target.value);
         // this.setState({
         //     inputValue: e.target.value
         // });
 
         // 新版本支持setState的参数为函数，函数会异步调取执行，提前将e.target.value存放到一变量中
-        const value = e.target.value;
-        this.setState( () => ({
-            inputValue: value
-        }));
+        // const value = e.target.value;
+        // this.setState( () => ({
+        //     inputValue: value
+        // }));
+        
+        const action = {
+            type: 'CHANGE_INPUT_VALUE',
+            value: e.target.value
+        }
+        store.dispatch(action);
     }
 
     handleBtnClick() {
@@ -62,10 +60,15 @@ class TodoList extends Component {
         // });
 
         // setState里支持的函数参数，有一个参数prevState（原有state的值）
-        this.setState( (prevState) => ({
-            list: [...prevState.list, prevState.inputValue],
-            inputValue: ''
-        }));
+        // this.setState( (prevState) => ({
+        //     list: [...prevState.list, prevState.inputValue],
+        //     inputValue: ''
+        // }));
+
+        const action = {
+            type: 'COMMIT_INPUT_VALUE'
+        }
+        store.dispatch(action);
     }
 
     handleItemDelete(index) {
@@ -75,13 +78,23 @@ class TodoList extends Component {
         //     list
         // });
 
-        this.setState( (prevState) => {
-            const list = [...prevState.list];
-            list.splice(index, 1);
-            return {
-                list
-            };
-        });
+        // this.setState( (prevState) => {
+        //     const list = [...prevState.list];
+        //     list.splice(index, 1);
+        //     return {
+        //         list
+        //     };
+        // });
+
+        const action = {
+            type: 'DELETE_ITEM_VALUE',
+            index
+        }
+        store.dispatch(action);
+    }
+
+    handleStoreChange() {
+        this.setState(store.getState());
     }
 }
 
