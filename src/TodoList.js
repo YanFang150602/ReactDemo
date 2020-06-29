@@ -1,9 +1,11 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import store from './store';
-// import TodoItem from './TodoItem';
-import { Input, Button, List } from 'antd';
+import TodoListUI from './TodoListUI';
 import 'antd/dist/antd.css';
 
+/**
+ * 容器组件，主要负责业务逻辑的处理
+ */
 class TodoList extends Component {
     constructor(props) {
         super(props);
@@ -19,19 +21,13 @@ class TodoList extends Component {
 
     render() {
         return (
-            <Fragment>
-                <div>
-                    <label htmlFor="insertArea">输入内容</label>
-                    <Input placeholder="todo..." style={{width: '300px', marginRight: '10px'}}
-                        onChange={this.handleInputChange} value={this.state.inputValue}></Input>
-                    <Button type="primary" onClick={this.handleBtnClick}>提交</Button>
-                </div>
-                <List style={{marginTop: '10px',width: '300px'}}
-                    bordered
-                    dataSource={this.state.list}
-                    renderItem={ (item, index) => (<List.Item onClick={this.handleItemDelete.bind(this, index)}>{item}</List.Item>)}
-                />
-            </Fragment>
+            <TodoListUI
+                inputValue={this.state.inputValue}
+                list={this.state.list}
+                handleInputChange={this.handleInputChange}
+                handleBtnClick={this.handleBtnClick}
+                handleItemDelete={this.handleItemDelete}
+            />
         )
     }
 
