@@ -184,6 +184,175 @@ class TodoList extends Component {
 export default TodoList;
 ```
 
+# UI组件和容器组件
+
+1、UI组件主要负责页面的渲染，比较简洁，TodoListUI.js是个UI组件
+
+```js
+import React, { Component, Fragment } from 'react';
+import { Input, Button, List } from 'antd';
+
+/**
+ * UI组件，主要负责界面的渲染
+ */
+class TodoListUI extends Component {
+    render() {
+        return (
+            <Fragment>
+                <div>
+                    <label htmlFor="insertArea">输入内容</label>
+                    <Input placeholder="todo..." style={{width: '300px', marginRight: '10px'}}
+                        onChange={this.props.handleInputChange} value={this.props.inputValue}></Input>
+                    <Button type="primary" onClick={this.props.handleBtnClick}>提交</Button>
+                </div>
+                <List style={{marginTop: '10px',width: '300px'}}
+                    bordered
+                    dataSource={this.props.list}
+                    renderItem={ (item, index) => (<List.Item onClick={() => {this.props.handleItemDelete(index)}}>{item}</List.Item>)}
+                />
+            </Fragment>
+        )
+    }
+}
+
+export default TodoListUI;
+```
+
+2、容器组件，主要负责业务逻辑、数据处理，TodoList.js是一个容器组件
+
+```js
+import React, { Component } from 'react';
+import store from './store';
+import TodoListUI from './TodoListUI';
+import 'antd/dist/antd.css';
+
+/**
+ * 容器组件，主要负责业务逻辑的处理
+ */
+class TodoList extends Component {
+    constructor(props) {
+        super(props);
+        this.state = store.getState();
+
+        this.handleInputChange = this.handleInputChange.bind(this);
+        this.handleBtnClick = this.handleBtnClick.bind(this);
+        this.handleItemDelete = this.handleItemDelete.bind(this);
+        this.handleStoreChange = this.handleStoreChange.bind(this);
+        // 监听store.state的变化
+        store.subscribe(this.handleStoreChange);
+    }
+
+    render() {
+        return (
+            <TodoListUI
+                inputValue={this.state.inputValue}
+                list={this.state.list}
+                handleInputChange={this.handleInputChange}
+                handleBtnClick={this.handleBtnClick}
+                handleItemDelete={this.handleItemDelete}
+            />
+        )
+    }
+
+    handleInputChange(e) {
+        console.log(e.target.value);
+        // this.setState({
+        //     inputValue: e.target.value
+        // });
+
+        // 新版本支持setState的参数为函数，函数会异步调取执行，提前将e.target.value存放到一变量中
+        // const value = e.target.value;
+        // this.setState( () => ({
+        //     inputValue: value
+        // }));
+        
+        const action = {
+            type: 'CHANGE_INPUT_VALUE',
+            value: e.target.value
+        }
+        store.dispatch(action);
+    }
+
+    handleBtnClick() {
+        // this.setState({
+        //     list: [...this.state.list, this.state.inputValue],
+        //     inputValue: ''
+        // });
+
+        // setState里支持的函数参数，有一个参数prevState（原有state的值）
+        // this.setState( (prevState) => ({
+        //     list: [...prevState.list, prevState.inputValue],
+        //     inputValue: ''
+        // }));
+
+        const action = {
+            type: 'COMMIT_INPUT_VALUE'
+        }
+        store.dispatch(action);
+    }
+
+    handleItemDelete(index) {
+        // const list = [...this.state.list];
+        // list.splice(index, 1);
+        // this.setState({
+        //     list
+        // });
+
+        // this.setState( (prevState) => {
+        //     const list = [...prevState.list];
+        //     list.splice(index, 1);
+        //     return {
+        //         list
+        //     };
+        // });
+
+        const action = {
+            type: 'DELETE_ITEM_VALUE',
+            index
+        }
+        store.dispatch(action);
+    }
+
+    handleStoreChange() {
+        this.setState(store.getState());
+    }
+}
+
+export default TodoList;
+```
+
+# 无状态组件
+
+无状态组件是UI组件更简洁的写法，就是个函数，性能高
+
+```js
+import React, { Fragment } from 'react';
+import { Input, Button, List } from 'antd';
+
+/**
+ * 无状态组件，比UI组件、容器组件性能高，是UI组件的简写
+ */
+const TodoListUI = (props) => {
+    return (
+        <Fragment>
+            <div>
+                <label htmlFor="insertArea">输入内容</label>
+                <Input placeholder="todo..." style={{width: '300px', marginRight: '10px'}}
+                    onChange={props.handleInputChange} value={props.inputValue}></Input>
+                <Button type="primary" onClick={props.handleBtnClick}>提交</Button>
+            </div>
+            <List style={{marginTop: '10px',width: '300px'}}
+                bordered
+                dataSource={props.list}
+                renderItem={ (item, index) => (<List.Item onClick={() => {props.handleItemDelete(index)}}>{item}</List.Item>)}
+            />
+        </Fragment>
+    )
+}
+
+export default TodoListUI;
+```
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 # Available Scripts
