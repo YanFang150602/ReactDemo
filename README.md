@@ -60,7 +60,129 @@ TodoItem.defaultProps = {
 export default TodoItem;
 ```
 
+# redux
 
+1、安装redux
+
+```shell
+npm install redux --save
+```
+
+2、新建store/index.js，创建store，将全局的状态数据存到store里（store里的state）
+
+```js
+import { createStore } from 'redux';
+import reducer from './reducer';
+
+const store = createStore(reducer);
+
+export default store;
+```
+
+3、新建store/reducer.js，接收业务js里的action，更改且返回全局状态数据（store里的state），
+
+```js
+const defaultState = {
+    inputValue: '',
+    list: []
+}
+
+export default (state = defaultState, action) => {
+    if(action.type === 'CHANGE_INPUT_VALUE') {
+        const newState = JSON.parse(JSON.stringify(state));
+        newState.inputValue = action.value;
+        return newState;
+    }
+    else if(action.type === 'COMMIT_INPUT_VALUE') {
+        const newState = {
+            inputValue: '',
+            list: [...state.list, state.inputValue]
+        }
+        return newState;
+    }
+    else if(action.type === 'DELETE_ITEM_VALUE') {
+        const newState = JSON.parse(JSON.stringify(state));
+        newState.list.splice(action.index, 1);
+        return newState;
+    }
+
+    return state;
+}
+```
+
+4、业务js里触发更改store里的state数据：store.dispatch(action)，这个会调用执行reducer.js里的方法；
+
+且监听store.state的变化：store.subscribe(需要执行的函数名)，将更改的store里的state数据更新到业务js里
+
+```js
+import React, { Component, Fragment } from 'react';
+import store from './store';
+// import TodoItem from './TodoItem';
+import { Input, Button, List } from 'antd';
+import 'antd/dist/antd.css';
+
+class TodoList extends Component {
+    constructor(props) {
+        super(props);
+        this.state = store.getState();
+
+        this.handleInputChange = this.handleInputChange.bind(this);
+        this.handleBtnClick = this.handleBtnClick.bind(this);
+        this.handleItemDelete = this.handleItemDelete.bind(this);
+        this.handleStoreChange = this.handleStoreChange.bind(this);
+        // 监听store.state的变化
+        store.subscribe(this.handleStoreChange);
+    }
+
+    render() {
+        return (
+            <Fragment>
+                <div>
+                    <label htmlFor="insertArea">输入内容</label>
+                    <Input placeholder="todo..." style={{width: '300px', marginRight: '10px'}}
+                        onChange={this.handleInputChange} value={this.state.inputValue}></Input>
+                    <Button type="primary" onClick={this.handleBtnClick}>提交</Button>
+                </div>
+                <List style={{marginTop: '10px',width: '300px'}}
+                    bordered
+                    dataSource={this.state.list}
+                    renderItem={ (item, index) => (<List.Item onClick={this.handleItemDelete.bind(this, index)}>{item}</List.Item>)}
+                />
+            </Fragment>
+        )
+    }
+
+    handleInputChange(e) {
+        const action = {
+            type: 'CHANGE_INPUT_VALUE',
+            value: e.target.value
+        }
+        // 触发更改store里的state数据
+        store.dispatch(action);
+    }
+
+    handleBtnClick() {
+        const action = {
+            type: 'COMMIT_INPUT_VALUE'
+        }
+        store.dispatch(action);
+    }
+
+    handleItemDelete(index) {
+        const action = {
+            type: 'DELETE_ITEM_VALUE',
+            index
+        }
+        store.dispatch(action);
+    }
+
+    handleStoreChange() {
+        this.setState(store.getState());
+    }
+}
+
+export default TodoList;
+```
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 

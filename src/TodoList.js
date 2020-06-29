@@ -13,6 +13,7 @@ class TodoList extends Component {
         this.handleBtnClick = this.handleBtnClick.bind(this);
         this.handleItemDelete = this.handleItemDelete.bind(this);
         this.handleStoreChange = this.handleStoreChange.bind(this);
+        // 监听store.state的变化
         store.subscribe(this.handleStoreChange);
     }
 
